@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Tags;
 using Un4seen.Bass.AddOn.Wma;
 
 namespace AudioPlayerBassNet
@@ -93,7 +94,7 @@ namespace AudioPlayerBassNet
             model.balanceLevel = 0;
            
             //model.BassPluginsHandles.Add(Bass.BASS_PluginLoad("bass_aac.dll"));
-            //model.BassPluginsHandles.Add(Bass.BASS_PluginLoad("basswma.dll"));
+            model.BassPluginsHandles.Add(Bass.BASS_PluginLoad("basswma.dll"));
             //model.BassPluginsHandles.Add(Bass.BASS_PluginLoad("bassflac.dll"));
             //Bass.BASS_SetVolume(model.volumeLevel);
             //Bass.BASS_ChannelSetAttribute(model.stream, BASSAttribute.BASS_ATTRIB_VOL, model.volumeLevel);
@@ -129,12 +130,14 @@ namespace AudioPlayerBassNet
                     view.timerForChange.Stop();
                     Bass.BASS_ChannelStop(model.stream);
                     model.playStatus = "stopped";
+
                     model.stream = Bass.BASS_StreamCreateFile(model.paths[view.listPlay.SelectedIndex], 0, 0, BASSFlag.BASS_DEFAULT);
                     if (model.stream != 0)
                     {
                         model.playStatus = "playing";
                         PlayTimer.Start();
                         BarTimer.Start();
+                        view.btPlay.Enabled = false;
                         view.timerForChange.Interval = (int)Bass.BASS_ChannelBytes2Seconds(model.stream, Bass.BASS_ChannelGetLength(model.stream)) * 1000;
                         view.timerForChange.Start();
                     }
@@ -145,6 +148,7 @@ namespace AudioPlayerBassNet
                     if (model.stream != 0)
                     {
                         model.playStatus = "playing";
+                        view.btPlay.Enabled = false;
                         PlayTimer.Start();
                         BarTimer.Start();
                         view.timerForChange.Interval = (int)Bass.BASS_ChannelBytes2Seconds(model.stream, Bass.BASS_ChannelGetLength(model.stream)) * 1000;
@@ -171,6 +175,7 @@ namespace AudioPlayerBassNet
                 PlayTimer.Stop();
                 BarTimer.Stop();
                 Bass.BASS_ChannelStop(model.stream);
+                view.btPlay.Enabled = true; 
                 model.playStatus = "stopped";
                 setBarPos();
             }
@@ -347,8 +352,8 @@ namespace AudioPlayerBassNet
         private void ApplicationClose(object sender, FormClosedEventArgs e)
         {
             Bass.BASS_Stop();
-            //for (int i = 0; i < model.BassPluginsHandles.Count; i++)
-            //   Bass.BASS_PluginFree(model.BassPluginsHandles[i]);
+            for (int i = 0; i < model.BassPluginsHandles.Count; i++)
+               Bass.BASS_PluginFree(model.BassPluginsHandles[i]);
             Bass.BASS_Free();
             Application.Exit();
         }

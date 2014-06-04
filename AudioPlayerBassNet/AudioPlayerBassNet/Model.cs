@@ -16,5 +16,6 @@ namespace AudioPlayerBassNet
         public float volumeLevel;
         public float balanceLevel;
         public List<int> BassPluginsHandles = new List<int>();
+        public BASS_CHANNELINFO info;
     }
 }
